@@ -1,40 +1,18 @@
 <!doctype html>
-<html lang="bn">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ShopBD Admin Panel</title><link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="topbar"><a class="brand" href="index.html">ShopBD<span>Admin Panel</span></a><nav><a href="index.html">সাইট দেখুন</a><button id="resetDemo" class="secondary">ডেমো রিসেট</button></nav></header>
-<main class="admin-main">
-  <section class="admin-hero"><p class="eyebrow">Marketplace Control</p><h1>ShopBD Admin Dashboard</h1><p>বিক্রেতা, পণ্য, অর্ডার ও আনুমানিক কমিশন পরিচালনা করুন।</p></section>
-  <div class="notice"><strong>ডেমো মোড:</strong> এই প্যানেলের তথ্য শুধু এই ব্রাউজারের localStorage-এ থাকে। এটি নিরাপদ লাইভ Admin Panel নয় এবং অন্য ব্যবহারকারীর তথ্য দেখতে পায় না। বাস্তব ব্যবহারের জন্য Firebase Authentication, Firestore Rules ও সার্ভার-সাইড যাচাই যুক্ত করতে হবে।</div>
-  <section class="section">
-    <div class="stat-grid">
-      <div class="stat">Pending seller<strong id="sellerCount">0</strong></div>
-      <div class="stat">Pending products<strong id="productCount">0</strong></div>
-      <div class="stat">মোট অর্ডার<strong id="orderCount">0</strong></div>
-      <div class="stat">অর্ডারের মোট মূল্য<strong id="salesTotal">৳0</strong></div>
-      <div class="stat">আনুমানিক কমিশন<strong id="commissionTotal">৳0</strong></div>
-    </div>
-  </section>
-  <div class="admin-layout">
-    <section class="admin-card"><h2>বিক্রেতার আবেদন</h2><div id="sellerList"></div></section>
-    <section class="admin-card"><h2>পণ্য যাচাই</h2><div id="productList"></div>
-      <h3>নতুন ডেমো পণ্য</h3>
-      <form id="productForm">
-        <label>পণ্যের নাম<input name="name" required maxlength="100"></label>
-        <label>ক্যাটাগরি<select name="category"><option>পোশাক</option><option>ইলেকট্রনিক্স</option><option>ঘর ও রান্নাঘর</option><option>সৌন্দর্য</option><option>অন্যান্য</option></select></label>
-        <label>দাম (৳)<input name="price" type="number" min="1" required></label>
-        <label>বিক্রেতার নাম<input name="seller" required maxlength="100"></label>
-        <label>ছবির HTTPS URL (ঐচ্ছিক)<input name="image" type="url"></label>
-        <label>বিবরণ<input name="description" maxlength="300"></label>
-        <button class="button" type="submit">Pending পণ্য যোগ করুন</button><p id="productMessage" class="form-message"></p>
-      </form>
-    </section>
-    <section class="admin-card" style="grid-column:1/-1"><h2>অর্ডার ব্যবস্থাপনা</h2><div id="orderList"></div></section>
-  </div>
-</main>
-<footer><a class="brand" href="index.html">ShopBD</a><p>Demo Admin UI · বাস্তব পেমেন্ট বা বিক্রেতা পেমেন্ট এখানে হয় না।</p></footer>
-<script src="admin.js"></script>
-</body></html>
+
+<section id="admin-login">
+  <h2>ShopBD Admin Login</h2>
+  <form id="login-form">
+    <label for="email">Admin Email</label>
+    <input id="email" type="email" required autocomplete="username">
+
+    <label for="password">Password</label>
+    <input id="password" type="password" required
+      autocomplete="current-password">
+
+    <button type="submit">Login</button>
+    <p id="login-message" role="status"></p>
+  </form>
+</section>
+
+<script type="module" src="./admin.js"></script>
