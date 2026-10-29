@@ -1,5 +1,5 @@
 /* Demo-only admin. This is NOT a secure production admin system. */
-const ADMIN_UID = "1vwxJ88hqKhErAIcwvCEBE2H3p63"; // এখানে আপনার ফায়ারবেস UID বসাবেন
+const ADMIN_UID="1vwxJ88hqKhErAIcwvCEBE2H3p63"; // এখানে আপনার ফায়ারবেস UID বসাবেন
 const KEY="shopbd_demo_v1";
 const starterProducts=[
   {
