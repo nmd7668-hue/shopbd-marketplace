@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShopBD | অর্ডার করুন</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:16px;font-family:Arial,sans-serif;background:#f3f6f9;color:#172033}
+main{max-width:680px;margin:20px auto;padding:20px;background:white;border-radius:14px;box-shadow:0 3px 15px #0001}
+h1,h2{color:#087443}label{display:block;margin-top:12px;font-weight:600}
+input,textarea,select,button{width:100%;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px}
+button{background:#087443;color:white;border:0;font-weight:bold;cursor:pointer}button:disabled{opacity:.6}
+.product,.summary{padding:12px;margin:10px 0;border:1px solid #dbe3ec;border-radius:10px}.summary{background:#f0fdf4}
+.product img{display:block;max-width:100%;max-height:170px;margin-top:8px}.message{white-space:pre-wrap;overflow-wrap:anywhere}.hint{color:#475569;font-size:14px}
+</style></head><body><main>
+<h1>ShopBD — অর্ডার করুন</h1><p>পণ্য নির্বাচন করে ডেলিভারির তথ্য পূরণ করুন।</p>
+<h2>১. পণ্য নির্বাচন</h2><div id="product-list">পণ্য লোড হচ্ছে…</div>
+<label for="quantity">পরিমাণ</label><input id="quantity" type="number" min="1" max="20" value="1" required>
+<form id="order-form"><h2>২. ডেলিভারির তথ্য</h2>
+<label for="customer-name">পূর্ণ নাম</label><input id="customer-name" maxlength="100" autocomplete="name" required>
+<label for="customer-phone">মোবাইল নম্বর</label><input id="customer-phone" type="tel" maxlength="20" autocomplete="tel" placeholder="01XXXXXXXXX" required>
+<label for="country">দেশ</label><select id="country" required><option value="বাংলাদেশ">বাংলাদেশ</option></select>
+<label for="division">বিভাগ</label><select id="division" required><option value="">বিভাগ নির্বাচন করুন</option><option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option><option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option><option>রংপুর</option><option>ময়মনসিংহ</option></select>
+<label for="district">জেলা</label><input id="district" maxlength="100" required placeholder="জেলার নাম">
+<label for="upazila">উপজেলা / থানা</label><input id="upazila" maxlength="100" required placeholder="উপজেলা বা থানার নাম">
+<label for="post-office">পোস্ট অফিস</label><input id="post-office" maxlength="100" required placeholder="পোস্ট অফিসের নাম">
+<label for="postal-code">পোস্ট কোড</label><input id="postal-code" inputmode="numeric" maxlength="10" required placeholder="পোস্ট কোড">
+<label for="customer-address">বাড়ি নম্বর, রোড, গ্রাম / এলাকা</label><textarea id="customer-address" maxlength="500" rows="3" required placeholder="বাড়ি নম্বর, রোড, গ্রাম/মহল্লা ও বিস্তারিত ঠিকানা"></textarea>
+<h2>৩. পেমেন্ট</h2><div class="summary"><strong>Cash on Delivery (COD)</strong><p class="hint">পণ্য হাতে পেয়ে ডেলিভারির সময় টাকা দিন।</p>
+<label for="payment-method">পেমেন্ট পদ্ধতি</label><select id="payment-method" required><option value="COD">Cash on Delivery</option></select>
+<p>মোট পণ্যমূল্য: <strong id="total-price">৳0</strong></p><p class="hint">ডেলিভারি চার্জ এখানে যোগ করা হয়নি।</p></div>
+<button id="submit-order" type="submit">অর্ডার নিশ্চিত করুন</button><p id="order-message" class="message" role="status"></p>
+</form></main><script type="module" src="./checkout.js"></script></body></html>
