@@ -1,55 +1,100 @@
-/* Demo-only admin. This is NOT a secure production admin system. */
-const ADMIN_UID="1vwxJ88hqKhErAIcwvCEBE2H3p63"; // এখানে আপনার ফায়ারবেস UID বসাবেন
-const KEY="shopbd_demo_v1";
-const starterProducts=[
-  {
-    id:"p101", 
-    name:"কটন ক্যাজুয়াল টি-শার্ট", 
-    category:"পোশাক", 
-    price:450, 
-    seller:"ShopBD Demo", 
-    emoji:"👕", 
-    description:"আরামদায়ক দৈনন্দিন পোশাক", 
-    status:"approved"
-  },
-  {
-    id:"p102", 
-    name:"অয়্যারলেস ইয়ারবাড", 
-    category:"ইলেকট্রনিক্স", 
-    price:1250, 
-    seller:"ShopBD Demo", 
-    emoji:"🎧", 
-    description:"দৈনন্দিন ব্যবহারের ইয়ারবাড", 
-    status:"approved"
-  },
-  {
-    id:"p103", 
-    name:"কিচেন স্টোরেজ সেট", 
-    category:"ঘর ও রান্নাঘর", 
-    price:680, 
-    seller:"ShopBD Demo", 
-    emoji:"🍱", 
-    description:"রান্নাঘর গুছিয়ে রাখুন", 
-    status:"approved"
-  },
-  {
-    id:"p104", 
-    name:"স্কিন কেয়ার সেট", 
-    category:"সৌন্দর্য", 
-    price:890, 
-    seller:"ShopBD Demo", 
-    emoji:"🧴", 
-    description:"নিজের যত্নের জন্য", 
-    status:"approved"
-  },
-  {
-    id:"p105", 
-    name:"দৈনন্দিন ব্যাকপ্যাক", 
-    category:"অন্যান্য", 
-    price:990, 
-    seller:"ShopBD Demo", 
-    emoji:"🎒", 
-    description:"কাজ বা ভ্রমণে ব্যবহারযোগ্য", 
-    status:"approved"
-  }
-];
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShopBD Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9; color: #172033;
+    }
+    .container {
+      max-width: 650px; margin: 20px auto;
+      background: white; padding: 22px;
+      border-radius: 14px; box-shadow: 0 4px 18px #0001;
+    }
+    h1, h2 { color: #087443; }
+    input, textarea, button {
+      width: 100%; padding: 12px; margin: 7px 0;
+      border-radius: 8px; font-size: 16px;
+    }
+    input, textarea { border: 1px solid #cbd5e1; }
+    button {
+      border: 0; background: #087443;
+      color: white; font-weight: bold; cursor: pointer;
+    }
+    button.secondary { background: #475569; }
+    .message { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .product {
+      border: 1px solid #dbe3ec; border-radius: 8px;
+      padding: 12px; margin: 10px 0;
+    }
+    .product button { background: #b42318; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>ShopBD Admin Panel</h1>
+
+    <section id="login-section">
+      <h2>অ্যাডমিন লগইন</h2>
+      <form id="login-form">
+        <label for="email">অ্যাডমিন ইমেইল</label>
+        <input id="email" type="email" autocomplete="username"
+               placeholder="আপনার Firebase ইমেইল" required>
+
+        <label for="password">পাসওয়ার্ড</label>
+        <input id="password" type="password"
+               autocomplete="current-password"
+               placeholder="আপনার পাসওয়ার্ড" required>
+
+        <button id="login-button" type="submit">Login</button>
+      </form>
+      <p id="login-message" class="message" role="status"></p>
+    </section>
+
+    <section id="admin-dashboard" hidden>
+      <h2>অ্যাডমিন ড্যাশবোর্ড</h2>
+      <p>লগইন সফল হয়েছে। এখানে পণ্য যোগ ও পরিচালনা করুন।</p>
+      <button id="logout-button" class="secondary" type="button">
+        Logout
+      </button>
+
+      <hr>
+      <h2>নতুন পণ্য যোগ করুন</h2>
+      <form id="product-form">
+        <label for="product-name">পণ্যের নাম</label>
+        <input id="product-name" maxlength="100"
+               placeholder="যেমন: টি-শার্ট" required>
+
+        <label for="product-price">দাম (সংখ্যায়)</label>
+        <input id="product-price" type="number" min="0" step="0.01"
+               placeholder="যেমন: 500" required>
+
+        <label for="product-image">ছবির URL (ঐচ্ছিক)</label>
+        <input id="product-image" type="url"
+               placeholder="https://example.com/image.jpg">
+
+        <label for="product-description">বিবরণ (ঐচ্ছিক)</label>
+        <textarea id="product-description" maxlength="1000"
+                  placeholder="পণ্যের বিবরণ"></textarea>
+
+        <button id="add-product-button" type="submit">
+          পণ্য যোগ করুন
+        </button>
+      </form>
+      <p id="product-message" class="message" role="status"></p>
+
+      <hr>
+      <h2>পণ্যের তালিকা</h2>
+      <div id="product-list">পণ্য লোড হচ্ছে…</div>
+    </section>
+  </main>
+
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>
