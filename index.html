@@ -1,73 +1,146 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="ShopBD Marketplace — বাংলাদেশের অনলাইন মার্কেটপ্লেস">
   <title>ShopBD Marketplace</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<header class="topbar">
-  <a class="brand" href="index.html">ShopBD<span>Marketplace</span></a>
-  <nav><a href="#products">পণ্য</a><a href="#seller">বিক্রেতা হন</a><a href="admin.html">Admin Panel</a></nav>
-</header>
-<main>
-  <section class="hero">
-    <div>
-      <p class="eyebrow">বাংলাদেশের অনলাইন মার্কেটপ্লেস</p>
-      <h1>আপনার পছন্দের পণ্য,<br><span>এক জায়গায়</span></h1>
-      <p>বিভিন্ন বিক্রেতার পণ্য দেখুন এবং সহজে অর্ডার দিন।</p>
-      <a class="button" href="#products">পণ্য দেখুন</a>
-    </div>
-    <div class="hero-art" aria-hidden="true"><div class="hero-circle">🛍️</div><span class="float-tag tag-one">নতুন পণ্য</span><span class="float-tag tag-two">সহজ অর্ডার</span></div>
-  </section>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="ShopBD Home">
+      <img
+        src="./logo.png"
+        alt="ShopBD Marketplace"
+        style="width:160px;max-width:45vw;height:auto;display:block;object-fit:contain;"
+      >
+    </a>
 
-  <section class="section">
-    <div class="section-heading"><div><p class="eyebrow">বেছে নিন</p><h2>ক্যাটাগরি</h2></div></div>
-    <div class="categories">
-      <button class="category active" data-category="সব">✨ সব পণ্য</button>
-      <button class="category" data-category="পোশাক">👕 পোশাক</button>
-      <button class="category" data-category="ইলেকট্রনিক্স">📱 ইলেকট্রনিক্স</button>
-      <button class="category" data-category="ঘর ও রান্নাঘর">🏠 ঘর ও রান্নাঘর</button>
-      <button class="category" data-category="সৌন্দর্য">🧴 সৌন্দর্য</button>
-      <button class="category" data-category="অন্যান্য">🎁 অন্যান্য</button>
-    </div>
-  </section>
+    <nav>
+      <a href="#products">পণ্য</a>
+      <a href="#seller">বিক্রেতা হন</a>
+      <a href="admin.html">Admin Panel</a>
+    </nav>
+  </header>
 
-  <section class="section" id="products">
-    <div class="section-heading"><div><p class="eyebrow">ShopBD সংগ্রহ</p><h2>জনপ্রিয় পণ্য</h2></div>
-      <input id="search" class="search" type="search" placeholder="পণ্য খুঁজুন..." aria-label="পণ্য খুঁজুন">
-    </div>
-    <div id="productGrid" class="product-grid"></div>
-    <p id="emptyProducts" class="empty" hidden>এই ক্যাটাগরিতে এখনো কোনো পণ্য নেই।</p>
-  </section>
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">বাংলাদেশের অনলাইন মার্কেটপ্লেস</p>
+        <h1>আপনার পছন্দের পণ্য,<br><span>এক জায়গায়</span></h1>
+        <p>বিভিন্ন বিক্রেতার পণ্য দেখুন এবং সহজে অর্ডার দিন।</p>
+        <a class="button" href="#products">পণ্য দেখুন</a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-circle">🛍️</div>
+        <span class="float-tag tag-one">নতুন পণ্য</span>
+        <span class="float-tag tag-two">সহজ অর্ডার</span>
+      </div>
+    </section>
 
-  <section class="section seller-section" id="seller">
-    <div><p class="eyebrow">আপনার ব্যবসা শুরু করুন</p><h2>ShopBD-তে বিক্রেতা হোন</h2><p>আপনার দোকানের তথ্য জমা দিন। Admin অনুমোদনের পর পণ্য প্রকাশ করতে পারবেন।</p></div>
-    <form id="sellerForm" class="form-card">
-      <label>আপনার নাম<input name="name" required maxlength="80" placeholder="পূর্ণ নাম"></label>
-      <label>ইমেইল বা ফোন<input name="contact" required maxlength="100" placeholder="যোগাযোগের তথ্য"></label>
-      <label>দোকানের নাম<input name="shop" required maxlength="100" placeholder="দোকানের নাম"></label>
-      <button class="button" type="submit">বিক্রেতার আবেদন</button>
-      <p id="sellerMessage" class="form-message" role="status"></p>
-    </form>
-  </section>
-  <section class="trust-row"><div>📦 <strong>বিভিন্ন পণ্য</strong><span>এক জায়গায়</span></div><div>🤝 <strong>বিক্রেতা নেটওয়ার্ক</strong><span>একাধিক দোকান</span></div><div>📞 <strong>সহজ যোগাযোগ</strong><span>অর্ডারের জন্য</span></div></section>
-</main>
-<footer><a class="brand" href="#">ShopBD</a><p>© <span id="year"></span> ShopBD Marketplace · যোগাযোগ · গোপনীয়তা · রিটার্ন নীতি</p><p class="disclaimer">ডেমো সংস্করণ: এখানে অর্ডার ও বিক্রেতার তথ্য এই ব্রাউজারেই সংরক্ষিত হয়। বাস্তব গ্রাহক তথ্য বা পেমেন্ট নেওয়ার আগে নিরাপদ সার্ভার ও ডেটাবেস সংযোগ করুন।</p></footer>
-<div id="orderModal" class="modal" hidden>
-  <div class="modal-card"><button id="closeModal" class="close" aria-label="বন্ধ করুন">×</button><h2>অর্ডার ফর্ম</h2><p id="orderProductName"></p>
-    <form id="orderForm">
-      <input type="hidden" name="productId">
-      <label>আপনার নাম<input name="customer" required maxlength="100"></label>
-      <label>মোবাইল নম্বর<input name="phone" required inputmode="tel" maxlength="30" placeholder="01XXXXXXXXX"></label>
-      <label>ডেলিভারির ঠিকানা<textarea name="address" required minlength="8" maxlength="500"></textarea></label>
-      <label>পেমেন্ট পদ্ধতি<select name="payment"><option value="COD">Cash on Delivery (COD)</option></select></label>
-      <button class="button" type="submit">অর্ডার জমা দিন</button><p id="orderMessage" class="form-message" role="status"></p>
-    </form>
+    <section class="section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">বেছে নিন</p>
+          <h2>ক্যাটাগরি</h2>
+        </div>
+      </div>
+
+      <div class="categories">
+        <button class="category active" data-category="সব">✨ সব পণ্য</button>
+        <button class="category" data-category="পোশাক">👕 পোশাক</button>
+        <button class="category" data-category="ইলেকট্রনিক্স">📱 ইলেকট্রনিক্স</button>
+        <button class="category" data-category="ঘর ও রান্নাঘর">🏠 ঘর ও রান্নাঘর</button>
+        <button class="category" data-category="সৌন্দর্য">🧴 সৌন্দর্য</button>
+        <button class="category" data-category="অন্যান্য">🎁 অন্যান্য</button>
+      </div>
+    </section>
+
+    <section class="section" id="products">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ShopBD সংগ্রহ</p>
+          <h2>জনপ্রিয় পণ্য</h2>
+        </div>
+        <input id="search" class="search" type="search"
+          placeholder="পণ্য খুঁজুন..." aria-label="পণ্য খুঁজুন">
+      </div>
+
+      <div id="productGrid" class="product-grid"></div>
+      <p id="emptyProducts" class="empty" hidden>
+        এই ক্যাটাগরিতে এখনো কোনো পণ্য নেই।
+      </p>
+    </section>
+
+    <section class="section seller-section" id="seller">
+      <div>
+        <p class="eyebrow">আপনার ব্যবসা শুরু করুন</p>
+        <h2>ShopBD-তে বিক্রেতা হোন</h2>
+        <p>আপনার দোকানের তথ্য জমা দিন। Admin অনুমোদনের পর পণ্য প্রকাশ করতে পারবেন।</p>
+      </div>
+
+      <form id="sellerForm" class="form-card">
+        <label>আপনার নাম
+          <input name="name" required maxlength="80" placeholder="পূর্ণ নাম">
+        </label>
+        <label>ইমেইল বা ফোন
+          <input name="contact" required maxlength="100" placeholder="যোগাযোগের তথ্য">
+        </label>
+        <label>দোকানের নাম
+          <input name="shop" required maxlength="100" placeholder="দোকানের নাম">
+        </label>
+        <button class="button" type="submit">বিক্রেতার আবেদন</button>
+        <p id="sellerMessage" class="form-message" role="status"></p>
+      </form>
+    </section>
+
+    <section class="trust-row">
+      <div>📦 <strong>বিভিন্ন পণ্য</strong><span>এক জায়গায়</span></div>
+      <div>🤝 <strong>বিক্রেতা নেটওয়ার্ক</strong><span>একাধিক দোকান</span></div>
+      <div>📞 <strong>সহজ যোগাযোগ</strong><span>অর্ডারের জন্য</span></div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand" href="index.html">ShopBD</a>
+    <p>© <span id="year"></span> ShopBD Marketplace · যোগাযোগ · গোপনীয়তা · রিটার্ন নীতি</p>
+    <p class="disclaimer">
+      ডেমো সংস্করণ: বাস্তব গ্রাহকের তথ্য বা পেমেন্ট নেওয়ার আগে নিরাপদ সার্ভার ও ডেটাবেস সংযোগ করুন।
+    </p>
+  </footer>
+
+  <div id="orderModal" class="modal" hidden>
+    <div class="modal-card">
+      <button id="closeModal" class="close" aria-label="বন্ধ করুন">×</button>
+      <h2>অর্ডার ফর্ম</h2>
+      <p id="orderProductName"></p>
+
+      <form id="orderForm">
+        <input type="hidden" name="productId">
+
+        <label>আপনার নাম
+          <input name="customer" required maxlength="100">
+        </label>
+        <label>মোবাইল নম্বর
+          <input name="phone" required inputmode="tel" maxlength="30" placeholder="01XXXXXXXXX">
+        </label>
+        <label>ডেলিভারির ঠিকানা
+          <textarea name="address" required minlength="8" maxlength="500"></textarea>
+        </label>
+        <label>পেমেন্ট পদ্ধতি
+          <select name="payment">
+            <option value="COD">Cash on Delivery (COD)</option>
+          </select>
+        </label>
+
+        <button class="button" type="submit">অর্ডার জমা দিন</button>
+        <p id="orderMessage" class="form-message" role="status"></p>
+      </form>
+    </div>
   </div>
-</div>
-<script src="app.js"></script>
+
+  <script src="app.js"></script>
 </body>
 </html>
