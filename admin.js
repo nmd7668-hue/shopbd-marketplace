@@ -1,15 +1,16 @@
- sendPasswordResetEmail
+// ==========================================
+// ShopBD Admin Panel
+// Firebase Authentication + Realtime Database
+// ==========================================
+
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import {
-  sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 import {
   getAuth,
-  getAuth,
-signInWithEmailAndPassword,
-sendPasswordResetEmail,
-onAuthStateChanged,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
@@ -23,11 +24,15 @@ import {
   remove
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-// আপনার আগের Firebase Configuration
+
+// ==========================================
+// 1. FIREBASE CONFIGURATION
+// ==========================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyAxf-pduCq1xyybAMLjXtJ5QPj4hjHKlPo",
   authDomain: "shopbd-c5326.firebaseapp.com",
-  databaseURL: "https://shopbd-c5326-default-rtdb.firebaseio.com/",
+  databaseURL: "https://shopbd-c5326-default-rtdb.firebaseio.com",
   projectId: "shopbd-c5326",
   storageBucket: "shopbd-c5326.firebasestorage.app",
   messagingSenderId: "1056649748208",
@@ -35,192 +40,418 @@ const firebaseConfig = {
   measurementId: "G-77ME2TGNMV"
 };
 
+
+// আপনার Admin UID
 const ADMIN_UID = "1vwxJ88hqKhErAIcwwCEBE2H3p63";
 
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// HTML elements
+
+// ==========================================
+// 2. HTML ELEMENTS
+// ==========================================
+
 const $ = id => document.getElementById(id);
 
 const loginSection = $("login-section");
 const dashboard = $("admin-dashboard");
+
 const loginForm = $("login-form");
 const loginMessage = $("login-message");
+
+const forgotButton = $("forgot-password-button");
+const logoutButton = $("logout-button");
+
 const productForm = $("product-form");
 const productMessage = $("product-message");
 const productList = $("product-list");
+
 const sellerList = $("seller-list");
 const orderList = $("order-list");
 
 let editingProductId = null;
 let listenersStarted = false;
 
-function message(id, text) {
-  if ($(id)) $(id).textContent = text;
-}
-// Forgot Password
-const forgotPasswordButton =
-  document.getElementById("forgot-password-button");
 
-forgotPasswordButton?.addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
+// ==========================================
+// 3. MESSAGE FUNCTION
+// ==========================================
+
+function message(id, text) {
+  const element = $(id);
+
+  if (element) {
+    element.textContent = text;
+  }
+}
+
+
+// ==========================================
+// 4. ADMIN CHECK
+// ==========================================
+
+function isAdmin() {
+  return (
+    auth.currentUser &&
+    auth.currentUser.uid === ADMIN_UID
+  );
+}
+
+
+// ==========================================
+// 5. FORGOT PASSWORD
+// ==========================================
+
+forgotButton?.addEventListener("click", async () => {
+
+  const email = $("email")?.value.trim();
 
   if (!email) {
-    showLoginMessage("আগে Admin Gmail লিখুন।");
+    message(
+      "login-message",
+      "আগে আপনার Admin Gmail লিখুন।"
+    );
     return;
   }
 
+  forgotButton.disabled = true;
+
+  message(
+    "login-message",
+    "Password Reset Email পাঠানো হচ্ছে..."
+  );
+
   try {
+
     await sendPasswordResetEmail(auth, email);
 
-    showLoginMessage(
-      "Password Reset লিংক Gmail-এ পাঠানো হয়েছে। Inbox ও Spam দেখুন।"
+    message(
+      "login-message",
+      "Password Reset লিংক পাঠানো হয়েছে। Gmail Inbox ও Spam পরীক্ষা করুন।"
     );
+
   } catch (error) {
-    showLoginMessage("Reset Error: " + error.code);
+
+    console.error("Password Reset Error:", error);
+
+    message(
+      "login-message",
+      "Password Reset করা যায়নি: " + error.code
+    );
+
+  } finally {
+
+    forgotButton.disabled = false;
+
   }
+
 });
-function isAdmin() {
-  return auth.currentUser?.uid === ADMIN_UID;
-}
 
-function makeCard(titleText) {
-  const card = document.createElement("div");
-  card.className = "card";
 
-  const title = document.createElement("h3");
-  title.textContent = titleText || "তথ্য নেই";
+// ==========================================
+// 6. ADMIN LOGIN
+// ==========================================
 
-  card.appendChild(title);
-  return card;
-}
+loginForm?.addEventListener("submit", async event => {
 
-function addText(card, text) {
-  const p = document.createElement("p");
-  p.textContent = text;
-  card.appendChild(p);
-}
-
-function makeButton(label, className, callback) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = label;
-  if (className) button.className = className;
-  button.addEventListener("click", callback);
-  return button;
-}
-
-// Login
-loginForm.addEventListener("submit", async event => {
   event.preventDefault();
 
   const button = $("login-button");
+
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  if (!email || !password) {
+    message(
+      "login-message",
+      "ইমেইল ও পাসওয়ার্ড লিখুন।"
+    );
+    return;
+  }
+
   button.disabled = true;
-  message("login-message", "লগইন হচ্ছে...");
+
+  message(
+    "login-message",
+    "লগইন হচ্ছে..."
+  );
 
   try {
-    const email = $("email").value.trim();
-    const password = $("password").value;
 
     const result = await signInWithEmailAndPassword(
-      auth, email, password
+      auth,
+      email,
+      password
     );
 
     if (result.user.uid !== ADMIN_UID) {
+
       await signOut(auth);
-      message("login-message", "এই অ্যাকাউন্ট Admin নয়।");
+
+      message(
+        "login-message",
+        "এই অ্যাকাউন্ট Admin নয়।"
+      );
+
     }
+
   } catch (error) {
-    console.error(error);
+
+    console.error("Login Error:", error);
+
     message(
       "login-message",
-      "লগইন ব্যর্থ। ইমেইল, পাসওয়ার্ড ও Firebase সেটিং পরীক্ষা করুন।"
+      "Login Error: " + error.code
     );
+
   } finally {
+
     button.disabled = false;
+
   }
+
 });
 
-// Authentication check
+
+// ==========================================
+// 7. AUTHENTICATION STATE
+// ==========================================
+
 onAuthStateChanged(auth, user => {
-  const allowed = !!user && user.uid === ADMIN_UID;
+
+  const allowed =
+    !!user && user.uid === ADMIN_UID;
 
   loginSection.hidden = allowed;
   dashboard.hidden = !allowed;
 
   if (user && !allowed) {
-    message("login-message", "Admin অনুমতি নেই।");
+
+    message(
+      "login-message",
+      "আপনার Admin অনুমতি নেই।"
+    );
+
     signOut(auth);
+    return;
+
   }
 
   if (allowed && !listenersStarted) {
+
     listenersStarted = true;
+
     loadProducts();
     loadSellers();
     loadOrders();
+
   }
+
 });
 
-// Logout
-$("logout-button").addEventListener("click", () => {
-  signOut(auth);
+
+// ==========================================
+// 8. LOGOUT
+// ==========================================
+
+logoutButton?.addEventListener("click", async () => {
+
+  try {
+
+    await signOut(auth);
+
+    listenersStarted = false;
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Logout করা যায়নি।");
+
+  }
+
 });
 
-// Dashboard tabs
+
+// ==========================================
+// 9. DASHBOARD TABS
+// ==========================================
+
 document.querySelectorAll("[data-tab]").forEach(button => {
+
   button.addEventListener("click", () => {
+
     document.querySelectorAll("[data-tab]").forEach(item => {
-      item.classList.toggle("active", item === button);
+
+      item.classList.toggle(
+        "active",
+        item === button
+      );
+
     });
 
-    ["products-section", "sellers-section", "orders-section"]
-      .forEach(id => {
-        $(id).hidden = id !== button.dataset.tab;
-      });
+    [
+      "products-section",
+      "sellers-section",
+      "orders-section"
+    ].forEach(id => {
+
+      const section = $(id);
+
+      if (section) {
+        section.hidden = id !== button.dataset.tab;
+      }
+
+    });
+
   });
+
 });
 
-// Reset product form
-function resetProductForm() {
-  productForm.reset();
-  editingProductId = null;
-  $("editing-product-id").value = "";
-  $("add-product-button").textContent = "পণ্য যোগ করুন";
-  $("cancel-edit-button").hidden = true;
+
+// ==========================================
+// 10. CARD HELPERS
+// ==========================================
+
+function makeCard(titleText) {
+
+  const card = document.createElement("div");
+
+  card.className = "card";
+
+  const title = document.createElement("h3");
+
+  title.textContent = titleText || "তথ্য নেই";
+
+  card.appendChild(title);
+
+  return card;
+
 }
 
-$("cancel-edit-button").addEventListener("click", resetProductForm);
 
-// Add or update product
-productForm.addEventListener("submit", async event => {
+function addText(card, text) {
+
+  const p = document.createElement("p");
+
+  p.textContent = text;
+
+  card.appendChild(p);
+
+}
+
+
+function makeButton(label, className, callback) {
+
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.textContent = label;
+
+  if (className) {
+    button.className = className;
+  }
+
+  button.addEventListener("click", callback);
+
+  return button;
+
+}
+
+
+// ==========================================
+// 11. RESET PRODUCT FORM
+// ==========================================
+
+function resetProductForm() {
+
+  productForm.reset();
+
+  editingProductId = null;
+
+  $("editing-product-id").value = "";
+
+  $("add-product-button").textContent =
+    "পণ্য যোগ করুন";
+
+  $("cancel-edit-button").hidden = true;
+
+}
+
+
+$("cancel-edit-button")?.addEventListener(
+  "click",
+  resetProductForm
+);
+
+
+// ==========================================
+// 12. ADD / UPDATE PRODUCTS
+// ==========================================
+
+productForm?.addEventListener("submit", async event => {
+
   event.preventDefault();
 
   if (!isAdmin()) {
-    message("product-message", "Admin অনুমতি নেই।");
+
+    message(
+      "product-message",
+      "Admin অনুমতি নেই।"
+    );
+
     return;
+
   }
 
   const name = $("product-name").value.trim();
-  const price = Number($("product-price").value);
-  const imageUrl = $("product-image").value.trim();
-  const description = $("product-description").value.trim();
 
-  if (!name || !Number.isFinite(price) || price < 0) {
-    message("product-message", "সঠিক পণ্যের নাম ও দাম দিন।");
+  const price = Number($("product-price").value);
+
+  const imageUrl = $("product-image").value.trim();
+
+  const description =
+    $("product-description").value.trim();
+
+  if (
+    !name ||
+    !Number.isFinite(price) ||
+    price < 0
+  ) {
+
+    message(
+      "product-message",
+      "সঠিক পণ্যের নাম ও দাম দিন।"
+    );
+
     return;
+
   }
 
-  if (imageUrl && !imageUrl.startsWith("https://")) {
-    message("product-message", "ছবির URL অবশ্যই https:// হতে হবে।");
+  if (
+    imageUrl &&
+    !imageUrl.startsWith("https://")
+  ) {
+
+    message(
+      "product-message",
+      "ছবির URL অবশ্যই https:// দিয়ে শুরু হতে হবে।"
+    );
+
     return;
+
   }
 
   const button = $("add-product-button");
+
   button.disabled = true;
 
   try {
+
     const data = {
       name,
       price,
@@ -230,211 +461,525 @@ productForm.addEventListener("submit", async event => {
     };
 
     if (editingProductId) {
+
       await update(
         ref(db, `products/${editingProductId}`),
         data
       );
-      message("product-message", "পণ্য আপডেট হয়েছে।");
+
+      message(
+        "product-message",
+        "পণ্য আপডেট হয়েছে।"
+      );
+
     } else {
+
       const newRef = push(ref(db, "products"));
+
       await set(newRef, {
         ...data,
         createdAt: Date.now()
       });
-      message("product-message", "নতুন পণ্য যোগ হয়েছে।");
+
+      message(
+        "product-message",
+        "নতুন পণ্য যোগ হয়েছে।"
+      );
+
     }
 
     resetProductForm();
+
   } catch (error) {
-    console.error(error);
-    message("product-message", "পণ্য সংরক্ষণ হয়নি। Database Rules পরীক্ষা করুন।");
+
+    console.error("Product Error:", error);
+
+    message(
+      "product-message",
+      "পণ্য সংরক্ষণ হয়নি। Database Rules পরীক্ষা করুন।"
+    );
+
   } finally {
+
     button.disabled = false;
+
   }
+
 });
 
-// Load products
+
+// ==========================================
+// 13. LOAD PRODUCTS
+// ==========================================
+
 function loadProducts() {
-  onValue(ref(db, "products"), snapshot => {
-    productList.replaceChildren();
 
-    if (!snapshot.exists()) {
-      productList.textContent = "কোনো পণ্য পাওয়া যায়নি।";
-      return;
-    }
+  onValue(
+    ref(db, "products"),
 
-    snapshot.forEach(child => {
-      const id = child.key;
-      const p = child.val() || {};
-      const card = makeCard(p.name);
+    snapshot => {
 
-      addText(card, `দাম: ৳${Number(p.price || 0)}`);
-      addText(card, p.description || "বিবরণ নেই");
+      productList.replaceChildren();
 
-      if (p.imageUrl?.startsWith("https://")) {
-        const image = document.createElement("img");
-        image.src = p.imageUrl;
-        image.alt = p.name || "পণ্য";
-        image.loading = "lazy";
-        card.appendChild(image);
+      if (!snapshot.exists()) {
+
+        productList.textContent =
+          "কোনো পণ্য পাওয়া যায়নি।";
+
+        return;
+
       }
 
-      card.appendChild(makeButton("সম্পাদনা করুন", "edit", () => {
-        editingProductId = id;
-        $("editing-product-id").value = id;
-        $("product-name").value = p.name || "";
-        $("product-price").value = p.price ?? "";
-        $("product-image").value = p.imageUrl || "";
-        $("product-description").value = p.description || "";
-        $("add-product-button").textContent = "পণ্য আপডেট করুন";
-        $("cancel-edit-button").hidden = false;
-        $("products-section").hidden = false;
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }));
+      snapshot.forEach(child => {
 
-      card.appendChild(makeButton("পণ্য মুছুন", "danger", async () => {
-        if (!isAdmin()) return;
-        if (!confirm(`${p.name || "এই পণ্য"} মুছবেন?`)) return;
+        const id = child.key;
 
-        try {
-          await remove(ref(db, `products/${id}`));
-          message("product-message", "পণ্য মুছে ফেলা হয়েছে।");
-        } catch (error) {
-          console.error(error);
-          message("product-message", "পণ্য মোছা যায়নি।");
+        const p = child.val() || {};
+
+        const card = makeCard(p.name);
+
+        addText(
+          card,
+          `দাম: ৳${Number(p.price || 0)}`
+        );
+
+        addText(
+          card,
+          p.description || "বিবরণ নেই"
+        );
+
+        if (
+          p.imageUrl &&
+          p.imageUrl.startsWith("https://")
+        ) {
+
+          const image = document.createElement("img");
+
+          image.src = p.imageUrl;
+          image.alt = p.name || "পণ্য";
+          image.loading = "lazy";
+
+          card.appendChild(image);
+
         }
-      }));
 
-      productList.appendChild(card);
-    });
-  }, error => {
-    console.error(error);
-    productList.textContent = "পণ্য লোড করা যায়নি।";
-  });
-}
+        // Edit Product
+        card.appendChild(
+          makeButton(
+            "সম্পাদনা করুন",
+            "edit",
+            () => {
 
-// Load seller applications
-function loadSellers() {
-  onValue(ref(db, "sellerApplications"), snapshot => {
-    sellerList.replaceChildren();
+              editingProductId = id;
 
-    if (!snapshot.exists()) {
-      sellerList.textContent = "এখনো কোনো বিক্রেতার আবেদন নেই।";
-      return;
-    }
+              $("editing-product-id").value = id;
 
-    snapshot.forEach(child => {
-      const id = child.key;
-      const seller = child.val() || {};
-      const card = makeCard(seller.name || seller.shopName || "বিক্রেতার আবেদন");
+              $("product-name").value =
+                p.name || "";
 
-      addText(card, `দোকান: ${seller.shopName || "নেই"}`);
-      addText(card, `ইমেইল: ${seller.email || "নেই"}`);
-      addText(card, `ফোন: ${seller.phone || "নেই"}`);
-      addText(card, `ঠিকানা: ${seller.address || "নেই"}`);
-      addText(card, `অবস্থা: ${seller.status || "Pending"}`);
+              $("product-price").value =
+                p.price ?? "";
 
-      if (seller.status !== "approved") {
-        card.appendChild(makeButton("অনুমোদন করুন", "", async () => {
-          if (!isAdmin()) return;
-          try {
-            await update(ref(db, `sellerApplications/${id}`), {
-              status: "approved",
-              reviewedAt: Date.now()
-            });
-            message("seller-message", "বিক্রেতার আবেদন অনুমোদিত হয়েছে।");
-          } catch (error) {
-            console.error(error);
-            message("seller-message", "অনুমোদন করা যায়নি।");
-          }
-        }));
-      }
+              $("product-image").value =
+                p.imageUrl || "";
 
-      if (seller.status !== "rejected") {
-        card.appendChild(makeButton("Reject করুন", "danger", async () => {
-          if (!isAdmin()) return;
-          try {
-            await update(ref(db, `sellerApplications/${id}`), {
-              status: "rejected",
-              reviewedAt: Date.now()
-            });
-            message("seller-message", "আবেদন Reject করা হয়েছে।");
-          } catch (error) {
-            console.error(error);
-            message("seller-message", "Reject করা যায়নি।");
-          }
-        }));
-      }
+              $("product-description").value =
+                p.description || "";
 
-      sellerList.appendChild(card);
-    });
-  }, error => {
-    console.error(error);
-    sellerList.textContent = "বিক্রেতার আবেদন লোড হয়নি।";
-  });
-}
+              $("add-product-button").textContent =
+                "পণ্য আপডেট করুন";
 
-// Load and manage orders
-function loadOrders() {
-  onValue(ref(db, "orders"), snapshot => {
-    orderList.replaceChildren();
+              $("cancel-edit-button").hidden = false;
 
-    if (!snapshot.exists()) {
-      orderList.textContent = "এখনো কোনো অর্ডার নেই।";
-      return;
-    }
+              $("products-section").hidden = false;
 
-    snapshot.forEach(child => {
-      const id = child.key;
-      const order = child.val() || {};
-      const card = makeCard(`অর্ডার #${id}`);
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+              });
 
-      addText(card, `গ্রাহক: ${order.customer || order.name || "নেই"}`);
-      addText(card, `ফোন: ${order.phone || "নেই"}`);
-      addText(card, `ঠিকানা: ${order.address || "নেই"}`);
-      addText(card, `পণ্য: ${order.productName || order.product || "নেই"}`);
-      addText(card, `মোট দাম: ৳${Number(order.total || order.price || 0)}`);
-      addText(card, `পেমেন্ট: ${order.paymentMethod || "নেই"}`);
-      addText(card, `বর্তমান অবস্থা: ${order.status || "Pending"}`);
+            }
+          )
+        );
 
-      const select = document.createElement("select");
+        // Delete Product
+        card.appendChild(
+          makeButton(
+            "পণ্য মুছুন",
+            "danger",
+            async () => {
 
-      [
-        "Pending",
-        "Confirmed",
-        "Processing",
-        "Shipped",
-        "Delivered",
-        "Cancelled"
-      ].forEach(status => {
-        const option = document.createElement("option");
-        option.value = status;
-        option.textContent = status;
-        select.appendChild(option);
+              if (!isAdmin()) return;
+
+              if (
+                !confirm(
+                  `${p.name || "এই পণ্য"} মুছবেন?`
+                )
+              ) return;
+
+              try {
+
+                await remove(
+                  ref(db, `products/${id}`)
+                );
+
+                message(
+                  "product-message",
+                  "পণ্য মুছে ফেলা হয়েছে।"
+                );
+
+              } catch (error) {
+
+                console.error(error);
+
+                message(
+                  "product-message",
+                  "পণ্য মোছা যায়নি।"
+                );
+
+              }
+
+            }
+          )
+        );
+
+        productList.appendChild(card);
+
       });
 
-      select.value = order.status || "Pending";
-      card.appendChild(select);
+    },
 
-      card.appendChild(makeButton("স্ট্যাটাস আপডেট করুন", "", async () => {
-        if (!isAdmin()) return;
+    error => {
 
-        try {
-          await update(ref(db, `orders/${id}`), {
-            status: select.value,
-            updatedAt: Date.now()
-          });
-          message("order-message", "অর্ডারের স্ট্যাটাস আপডেট হয়েছে।");
-        } catch (error) {
-          console.error(error);
-          message("order-message", "স্ট্যাটাস আপডেট হয়নি।");
-        }
-      }));
+      console.error(error);
 
-      orderList.appendChild(card);
-    });
-  }, error => {
-    console.error(error);
-    orderList.textContent = "অর্ডার লোড করা যায়নি।";
-  });
+      productList.textContent =
+        "পণ্য লোড করা যায়নি। Database Rules পরীক্ষা করুন।";
+
+    }
+
+  );
+
 }
+
+
+// ==========================================
+// 14. LOAD SELLER APPLICATIONS
+// ==========================================
+
+function loadSellers() {
+
+  onValue(
+    ref(db, "sellerApplications"),
+
+    snapshot => {
+
+      sellerList.replaceChildren();
+
+      if (!snapshot.exists()) {
+
+        sellerList.textContent =
+          "এখনো কোনো বিক্রেতার আবেদন নেই।";
+
+        return;
+
+      }
+
+      snapshot.forEach(child => {
+
+        const id = child.key;
+
+        const seller = child.val() || {};
+
+        const card = makeCard(
+          seller.name ||
+          seller.shopName ||
+          "বিক্রেতার আবেদন"
+        );
+
+        addText(
+          card,
+          `দোকান: ${seller.shopName || "নেই"}`
+        );
+
+        addText(
+          card,
+          `ইমেইল: ${seller.email || "নেই"}`
+        );
+
+        addText(
+          card,
+          `ফোন: ${seller.phone || seller.contact || "নেই"}`
+        );
+
+        addText(
+          card,
+          `ঠিকানা: ${seller.address || "নেই"}`
+        );
+
+        addText(
+          card,
+          `অবস্থা: ${seller.status || "Pending"}`
+        );
+
+        // Approve
+        if (seller.status !== "approved") {
+
+          card.appendChild(
+            makeButton(
+              "অনুমোদন করুন",
+              "",
+              async () => {
+
+                if (!isAdmin()) return;
+
+                try {
+
+                  await update(
+                    ref(db, `sellerApplications/${id}`),
+                    {
+                      status: "approved",
+                      reviewedAt: Date.now()
+                    }
+                  );
+
+                  message(
+                    "seller-message",
+                    "বিক্রেতার আবেদন অনুমোদিত হয়েছে।"
+                  );
+
+                } catch (error) {
+
+                  console.error(error);
+
+                  message(
+                    "seller-message",
+                    "অনুমোদন করা যায়নি।"
+                  );
+
+                }
+
+              }
+            )
+          );
+
+        }
+
+        // Reject
+        if (seller.status !== "rejected") {
+
+          card.appendChild(
+            makeButton(
+              "Reject করুন",
+              "danger",
+              async () => {
+
+                if (!isAdmin()) return;
+
+                try {
+
+                  await update(
+                    ref(db, `sellerApplications/${id}`),
+                    {
+                      status: "rejected",
+                      reviewedAt: Date.now()
+                    }
+                  );
+
+                  message(
+                    "seller-message",
+                    "আবেদন Reject করা হয়েছে।"
+                  );
+
+                } catch (error) {
+
+                  console.error(error);
+
+                  message(
+                    "seller-message",
+                    "Reject করা যায়নি।"
+                  );
+
+                }
+
+              }
+            )
+          );
+
+        }
+
+        sellerList.appendChild(card);
+
+      });
+
+    },
+
+    error => {
+
+      console.error(error);
+
+      sellerList.textContent =
+        "বিক্রেতার আবেদন লোড হয়নি।";
+
+    }
+
+  );
+
+}
+
+
+// ==========================================
+// 15. LOAD AND MANAGE ORDERS
+// ==========================================
+
+function loadOrders() {
+
+  onValue(
+    ref(db, "orders"),
+
+    snapshot => {
+
+      orderList.replaceChildren();
+
+      if (!snapshot.exists()) {
+
+        orderList.textContent =
+          "এখনো কোনো অর্ডার নেই।";
+
+        return;
+
+      }
+
+      snapshot.forEach(child => {
+
+        const id = child.key;
+
+        const order = child.val() || {};
+
+        const card = makeCard(
+          `অর্ডার #${id}`
+        );
+
+        addText(
+          card,
+          `গ্রাহক: ${order.customer || order.name || "নেই"}`
+        );
+
+        addText(
+          card,
+          `ফোন: ${order.phone || "নেই"}`
+        );
+
+        addText(
+          card,
+          `ঠিকানা: ${order.address || "নেই"}`
+        );
+
+        addText(
+          card,
+          `পণ্য: ${order.productName || order.product || "নেই"}`
+        );
+
+        addText(
+          card,
+          `মোট দাম: ৳${Number(order.total || order.price || 0)}`
+        );
+
+        addText(
+          card,
+          `পেমেন্ট: ${order.paymentMethod || "নেই"}`
+        );
+
+        addText(
+          card,
+          `বর্তমান অবস্থা: ${order.status || "Pending"}`
+        );
+
+        const select = document.createElement("select");
+
+        [
+          "Pending",
+          "Confirmed",
+          "Processing",
+          "Shipped",
+          "Delivered",
+          "Cancelled"
+        ].forEach(status => {
+
+          const option = document.createElement("option");
+
+          option.value = status;
+          option.textContent = status;
+
+          select.appendChild(option);
+
+        });
+
+        select.value = order.status || "Pending";
+
+        card.appendChild(select);
+
+        // Update Order Status
+        card.appendChild(
+          makeButton(
+            "স্ট্যাটাস আপডেট করুন",
+            "",
+            async () => {
+
+              if (!isAdmin()) return;
+
+              try {
+
+                await update(
+                  ref(db, `orders/${id}`),
+                  {
+                    status: select.value,
+                    updatedAt: Date.now()
+                  }
+                );
+
+                message(
+                  "order-message",
+                  "অর্ডারের স্ট্যাটাস আপডেট হয়েছে।"
+                );
+
+              } catch (error) {
+
+                console.error(error);
+
+                message(
+                  "order-message",
+                  "স্ট্যাটাস আপডেট হয়নি।"
+                );
+
+              }
+
+            }
+          )
+        );
+
+        orderList.appendChild(card);
+
+      });
+
+    },
+
+    error => {
+
+      console.error(error);
+
+      orderList.textContent =
+        "অর্ডার লোড করা যায়নি।";
+
+    }
+
+  );
+
+}
+
+
+// ==========================================
+// END OF SHOPBD ADMIN PANEL
+// ==========================================
+
+console.log("ShopBD Admin Panel loaded successfully.");
