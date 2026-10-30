@@ -141,6 +141,92 @@
     </div>
   </div>
 
+<!-- SHOPBD DARAZ AFFILIATE SECTION -->
+<section id="daraz-affiliate" class="section">
+  <h2>🇧🇩 Daraz বিশেষ অফার</h2>
+  <p>পছন্দের পণ্য দেখুন এবং Daraz থেকে কিনুন।</p>
+  <p style="font-size:13px;color:#777">
+    Affiliate Disclosure: এই লিংক দিয়ে কেনাকাটা করলে
+    ShopBD কমিশন পেতে পারে।
+  </p>
+
+  <div id="darazProductGrid"
+       style="display:grid;
+       grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+       gap:14px;">
+  </div>
+</section>
+
+<script>
+const darazProducts = [
+  {
+    name: "Premium Nano Double-Sided Tape",
+    price: "৳৭৫",
+    image: "",
+    link: "https://s.daraz.com.bd/s.Yeutv?cc",
+    country: "বাংলাদেশ"
+  },
+
+  {
+    name: "Daraz পণ্য ২",
+    price: "দাম যোগ করুন",
+    image: "",
+    link: "YOUR_DARAZ_AFFILIATE_LINK_2",
+    country: "বাংলাদেশ"
+  },
+
+  {
+    name: "Daraz পণ্য ৩",
+    price: "দাম যোগ করুন",
+    image: "",
+    link: "YOUR_DARAZ_AFFILIATE_LINK_3",
+    country: "বাংলাদেশ"
+  }
+];
+
+const darazGrid = document.getElementById("darazProductGrid");
+
+darazProducts.forEach((product) => {
+  const card = document.createElement("article");
+
+  card.style.cssText =
+    "background:white;border:1px solid #eee;" +
+    "border-radius:12px;padding:12px;overflow:hidden;";
+
+  const image = document.createElement("img");
+  image.src = product.image ||
+    "https://placehold.co/300x220?text=ShopBD+Product";
+  image.alt = product.name;
+  image.style.cssText =
+    "width:100%;height:150px;object-fit:contain;";
+
+  const title = document.createElement("h3");
+  title.textContent = product.name;
+  title.style.fontSize = "15px";
+
+  const price = document.createElement("p");
+  price.textContent = product.price;
+  price.style.cssText =
+    "color:#e85b18;font-weight:bold;";
+
+  const button = document.createElement("a");
+  button.textContent = "Daraz থেকে কিনুন";
+  button.href = product.link;
+  button.target = "_blank";
+  button.rel = "sponsored noopener noreferrer";
+  button.style.cssText =
+    "display:block;text-align:center;padding:11px;" +
+    "background:#f85606;color:white;border-radius:8px;" +
+    "text-decoration:none;font-weight:bold;";
+
+  card.append(image, title, price, button);
+  darazGrid.appendChild(card);
+});
+</script>
+<!-- END DARAZ AFFILIATE SECTION -->
+</body>
+</html>
+
   <script src="app.js"></script>
 </body>
 </html>
