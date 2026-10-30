@@ -1,5 +1,4 @@
  
-
 /* ShopBD Daraz Affiliate */
 
 const products = [
@@ -10,6 +9,14 @@ const products = [
     description: "Daraz-এ পণ্যটি দেখুন ও কিনুন",
     emoji: "📱",
     link: "https://s.daraz.com.bd/s.YeFyI?cc"
+  },
+  {
+    id: "headphone001",
+    name: "হেডফোন",
+    category: "ইলেকট্রনিক্স",
+    description: "Daraz-এ হেডফোনটি দেখুন ও কিনুন",
+    emoji: "🎧",
+    link: "https://s.daraz.com.bd/s.Yevrj?cc"
   }
 ];
 
@@ -72,11 +79,15 @@ document.querySelector("#sellerForm")?.addEventListener("submit", e => {
   e.currentTarget.reset();
 
   const message = document.querySelector("#sellerMessage");
-  if (message) message.textContent =
-    "বিক্রেতার আবেদন ফিচারটি এখনো চালু করা হয়নি।";
+  if (message) {
+    message.textContent =
+      "বিক্রেতার আবেদন ফিচারটি এখনো চালু করা হয়নি।";
+  }
 });
 
 const year = document.querySelector("#year");
-if (year) year.textContent = new Date().getFullYear();
+if (year) {
+  year.textContent = new Date().getFullYear();
+}
 
 renderProducts();
