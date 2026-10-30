@@ -149,12 +149,17 @@
         <label>ডেলিভারির ঠিকানা
           <textarea name="address" required minlength="8" maxlength="500"></textarea>
         </label>
-        <label>পেমেন্ট পদ্ধতি
-          <select name="payment">
-            <option value="COD">Cash on Delivery (COD)</option>
-          </select>
-        </label>
 
+<label>পেমেন্ট পদ্ধতি
+  <select name="payment" required>
+    <option value="COD">Cash on Delivery (COD)</option>
+    <option value="SSLCOMMERZ">অনলাইন পেমেন্ট</option>
+  </select>
+</label>
+<p class="form-message">
+  অনলাইন পেমেন্ট নির্বাচন করলে পেমেন্ট পেজে bKash, Nagad ও Rocket-এর
+  উপলব্ধ অপশন দেখানো হবে।
+</p>
         <button class="button" type="submit">অর্ডার জমা দিন</button>
         <p id="orderMessage" class="form-message" role="status"></p>
       </form>
