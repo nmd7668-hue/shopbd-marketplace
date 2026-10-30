@@ -60,7 +60,28 @@ let listenersStarted = false;
 function message(id, text) {
   if ($(id)) $(id).textContent = text;
 }
+// Forgot Password
+const forgotPasswordButton =
+  document.getElementById("forgot-password-button");
 
+forgotPasswordButton?.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    showLoginMessage("আগে Admin Gmail লিখুন।");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+
+    showLoginMessage(
+      "Password Reset লিংক Gmail-এ পাঠানো হয়েছে। Inbox ও Spam দেখুন।"
+    );
+  } catch (error) {
+    showLoginMessage("Reset Error: " + error.code);
+  }
+});
 function isAdmin() {
   return auth.currentUser?.uid === ADMIN_UID;
 }
