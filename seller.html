@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShopBD Seller Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .seller-wrap{max-width:720px;margin:25px auto;padding:16px}
+    .seller-card{background:#fff;padding:20px;border-radius:14px;margin:15px 0;box-shadow:0 2px 12px #0001}
+    .seller-card input,.seller-card textarea,.seller-card select{width:100%;padding:12px;margin:7px 0 15px;box-sizing:border-box}
+    .seller-card button{padding:12px 18px;margin:5px;cursor:pointer}
+    .seller-product{border:1px solid #ddd;border-radius:10px;padding:12px;margin:12px 0}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+
+<header class="seller-wrap">
+  <h2>ShopBD Seller Dashboard</h2>
+  <p>দোকানদার লগইন ও পণ্য ব্যবস্থাপনা</p>
+  <a href="index.html">মূল ওয়েবসাইটে ফিরে যান</a>
+</header>
+
+<main class="seller-wrap">
+
+  <section id="loginSection" class="seller-card">
+    <h3>ফোন নম্বর দিয়ে লগইন</h3>
+    <label>ফোন নম্বর (দেশের কোডসহ)</label>
+    <input id="sellerPhone" type="tel" placeholder="+8801XXXXXXXXX">
+
+    <div id="recaptcha-container"></div>
+    <button id="sendOtpBtn" type="button">OTP পাঠান</button>
+
+    <label>OTP কোড</label>
+    <input id="otpCode" inputmode="numeric" maxlength="6" placeholder="৬ সংখ্যার OTP">
+    <button id="verifyOtpBtn" type="button">লগইন করুন</button>
+
+    <p id="loginMessage" role="status"></p>
+  </section>
+
+  <section id="dashboardSection" class="hidden">
+
+    <div class="seller-card">
+      <h3>আপনার দোকান</h3>
+      <p id="sellerShopName"></p>
+      <p id="sellerStatus"></p>
+      <p>আপনার UID: <code id="sellerUid"></code></p>
+      <button id="logoutBtn" type="button">লগআউট</button>
+    </div>
+
+    <div id="productSection" class="seller-card hidden">
+      <h3>নতুন পণ্য যোগ করুন</h3>
+
+      <form id="productForm">
+        <label>পণ্যের নাম</label>
+        <input name="name" required maxlength="120">
+
+        <label>ক্যাটাগরি</label>
+        <select name="category" required>
+          <option value="">নির্বাচন করুন</option>
+          <option>পোশাক</option>
+          <option>ইলেকট্রনিক্স</option>
+          <option>ঘর ও রান্নাঘর</option>
+          <option>সৌন্দর্য</option>
+          <option>অন্যান্য</option>
+        </select>
+
+        <label>পণ্যের ছবি URL</label>
+        <input name="imageUrl" type="url" placeholder="https://..." required>
+
+        <label>দাম (৳)</label>
+        <input name="price" type="number" min="1" required>
+
+        <label>স্টক</label>
+        <input name="stock" type="number" min="0" value="1" required>
+
+        <label>পণ্যের বিবরণ</label>
+        <textarea name="description" rows="4" required></textarea>
+
+        <button id="saveProductBtn" type="submit">পণ্য জমা দিন</button>
+        <button id="cancelEditBtn" type="button" class="hidden">সম্পাদনা বাতিল</button>
+      </form>
+
+      <p id="productMessage" role="status"></p>
+    </div>
+
+    <div class="seller-card">
+      <h3>আমার পণ্যসমূহ</h3>
+      <div id="myProducts">পণ্য লোড হচ্ছে...</div>
+    </div>
+
+  </section>
+</main>
+
+<script type="module" src="seller.js"></script>
+</body>
+</html>
