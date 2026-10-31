@@ -42,7 +42,7 @@ const firebaseConfig = {
 
 
 // আপনার Admin UID
-const ADMIN_UID = "mwXUZ3JiXXdvKces42jJ94TqePg2";
+const ADMIN_UID = "FtEZMX3m2jPRwef0yFh6OVDCmxs1";
 
 
 // Initialize Firebase
