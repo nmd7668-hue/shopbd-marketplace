@@ -16,9 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 
-// ==========================================
 // 1. FIREBASE CONFIGURATION
-// ==========================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxf-pduCq1xyybAMLjXtJ5QPj4hjHKlPo",
@@ -35,25 +33,25 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 
-// ==========================================
-// 2. HTML HELPERS
-// ==========================================
+// 2. HELPERS
 
 const $ = selector => document.querySelector(selector);
 
-function showMessage(selector, text) {
+function showMessage(selector, message) {
   const element = $(selector);
-  if (element) element.textContent = text;
+  if (element) element.textContent = message;
 }
 
 function safeText(value) {
   return String(value ?? "");
 }
 
+function getField(form, name) {
+  return form.querySelector(`[name="${name}"]`);
+}
 
-// ==========================================
-// 3. DARAZ AFFILIATE PRODUCTS
-// ==========================================
+
+// 3. AFFILIATE PRODUCTS
 
 const affiliateProducts = [
   {
@@ -78,11 +76,10 @@ const affiliateProducts = [
 
 let shopProducts = [];
 let activeCategory = "সব";
+let selectedProduct = null;
 
 
-// ==========================================
-// 4. LOAD PRODUCTS FROM FIREBASE
-// ==========================================
+// 4. LOAD PRODUCTS
 
 onValue(
   ref(db, "products"),
@@ -113,15 +110,13 @@ onValue(
     console.error("Product loading error:", error);
     showMessage(
       "#emptyProducts",
-      "পণ্য লোড করা যায়নি। Firebase Rules পরীক্ষা করুন।"
+      "পণ্য লোড হয়নি: " + error.message
     );
   }
 );
 
 
-// ==========================================
 // 5. RENDER PRODUCTS
-// ==========================================
 
 function renderProducts() {
   const grid = $("#productGrid");
@@ -130,7 +125,7 @@ function renderProducts() {
 
   if (!grid) return;
 
-  const query = (search?.value || "").trim().toLowerCase();
+  const query = safeText(search?.value).trim().toLowerCase();
 
   const allProducts = [
     ...affiliateProducts,
@@ -138,7 +133,6 @@ function renderProducts() {
   ];
 
   const items = allProducts.filter(product => {
-
     const categoryMatch =
       activeCategory === "সব" ||
       product.category === activeCategory;
@@ -155,25 +149,18 @@ function renderProducts() {
   grid.replaceChildren();
 
   items.forEach(product => {
-
     const card = document.createElement("article");
     card.className = "product-card";
 
     const imageArea = document.createElement("div");
     imageArea.className = "product-image";
 
-    if (
-      product.imageUrl &&
-      product.imageUrl.startsWith("https://")
-    ) {
+    if (product.imageUrl?.startsWith("https://")) {
       const image = document.createElement("img");
-
       image.src = product.imageUrl;
       image.alt = product.name;
       image.loading = "lazy";
-
       imageArea.appendChild(image);
-
     } else {
       imageArea.textContent = product.emoji || "🛍️";
     }
@@ -188,41 +175,26 @@ function renderProducts() {
     const description = document.createElement("p");
     description.textContent = product.description;
 
-    card.append(
-      imageArea,
-      category,
-      title,
-      description
-    );
+    card.append(imageArea, category, title, description);
 
     if (product.source === "affiliate") {
-
       const link = document.createElement("a");
-
       link.className = "button";
       link.href = product.link;
       link.target = "_blank";
       link.rel = "sponsored noopener noreferrer";
       link.textContent = "Daraz-এ কিনুন";
-
       card.appendChild(link);
-
     } else {
-
       const price = document.createElement("p");
-
-      price.textContent =
-        `দাম: ৳${product.price}`;
+      price.textContent = `দাম: ৳${product.price}`;
 
       const button = document.createElement("button");
-
       button.className = "button";
       button.type = "button";
       button.textContent = "অর্ডার করুন";
 
-      button.addEventListener("click", () => {
-        openOrder(product);
-      });
+      button.addEventListener("click", () => openOrder(product));
 
       card.append(price, button);
     }
@@ -232,59 +204,36 @@ function renderProducts() {
 
   if (empty) {
     empty.hidden = items.length > 0;
-
     if (!items.length) {
-      empty.textContent =
-        "এই ক্যাটাগরিতে কোনো পণ্য পাওয়া যায়নি।";
+      empty.textContent = "এই ক্যাটাগরিতে কোনো পণ্য পাওয়া যায়নি।";
     }
   }
 }
 
 
-// ==========================================
 // 6. CATEGORY FILTER
-// ==========================================
 
 document.querySelectorAll("[data-category]").forEach(button => {
-
   button.addEventListener("click", () => {
-
-    activeCategory =
-      button.dataset.category || "সব";
+    activeCategory = button.dataset.category || "সব";
 
     document.querySelectorAll("[data-category]").forEach(item => {
-
-      item.classList.toggle(
-        "active",
-        item === button
-      );
-
+      item.classList.toggle("active", item === button);
     });
 
     renderProducts();
   });
-
 });
 
 
-// ==========================================
-// 7. PRODUCT SEARCH
-// ==========================================
+// 7. SEARCH
 
-$("#search")?.addEventListener(
-  "input",
-  renderProducts
-);
+$("#search")?.addEventListener("input", renderProducts);
 
 
-// ==========================================
-// 8. ORDER SYSTEM - CASH ON DELIVERY
-// ==========================================
-
-let selectedProduct = null;
+// 8. OPEN ORDER MODAL
 
 function openOrder(product) {
-
   if (product.source !== "shopbd") {
     alert("এই Affiliate পণ্যের অর্ডার ShopBD থেকে নেওয়া হয় না।");
     return;
@@ -293,51 +242,30 @@ function openOrder(product) {
   selectedProduct = product;
 
   const modal = $("#orderModal");
-
   if (!modal) {
     alert("অর্ডার ফর্ম পাওয়া যায়নি।");
     return;
   }
 
   const title = $("#orderProductName");
+  if (title) title.textContent = product.name;
 
-  if (title) {
-    title.textContent = product.name;
-  }
+  const productId = getField(modal, "productId");
+  if (productId) productId.value = product.id;
 
-  const productId = modal.querySelector(
-    '[name="productId"]'
-  );
+  const payment = getField(modal, "payment");
+  if (payment) payment.value = "COD";
 
-  if (productId) {
-    productId.value = product.id;
-  }
-
-  const paymentSelect = modal.querySelector(
-    '[name="payment"]'
-  );
-
-  if (paymentSelect) {
-    paymentSelect.value = "COD";
-  }
-
-  const orderMessage = $("#orderMessage");
-
-  if (orderMessage) {
-    orderMessage.textContent = "";
-  }
+  showMessage("#orderMessage", "");
 
   modal.hidden = false;
   modal.style.display = "block";
 }
 
 
-// ==========================================
 // 9. CLOSE ORDER MODAL
-// ==========================================
 
 $("#closeModal")?.addEventListener("click", () => {
-
   const modal = $("#orderModal");
 
   if (modal) {
@@ -349,195 +277,127 @@ $("#closeModal")?.addEventListener("click", () => {
 });
 
 
-// ==========================================
-// 10. SUBMIT CUSTOMER ORDER
-// ==========================================
+// 10. SUBMIT ORDER
 
-$("#orderForm")?.addEventListener(
-  "submit",
-  async event => {
+$("#orderForm")?.addEventListener("submit", async event => {
+  event.preventDefault();
 
-    event.preventDefault();
+  const form = event.currentTarget;
 
-    if (!selectedProduct) {
-      showMessage(
-        "#orderMessage",
-        "আগে একটি ShopBD পণ্য নির্বাচন করুন।"
-      );
-      return;
-    }
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-
-    const customer =
-      safeText(formData.get("customer")).trim();
-
-    const phone =
-      safeText(formData.get("phone")).trim();
-
-    const address =
-      safeText(formData.get("address")).trim();
-
-    const payment =
-      safeText(formData.get("payment"));
-
-    if (!customer || !phone || !address) {
-      showMessage(
-        "#orderMessage",
-        "নাম, ফোন ও ঠিকানা পূরণ করুন।"
-      );
-      return;
-    }
-
-    if (address.length < 8) {
-      showMessage(
-        "#orderMessage",
-        "সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।"
-      );
-      return;
-    }
-
-    if (payment !== "COD") {
-      showMessage(
-        "#orderMessage",
-        "বর্তমানে শুধু Cash on Delivery চালু আছে।"
-      );
-      return;
-    }
-
-    const button = form.querySelector(
-      '[type="submit"]'
-    );
-
-    if (button) button.disabled = true;
-
-    try {
-
-      const orderRef = push(ref(db, "orders"));
-
-      await set(orderRef, {
-
-        productId: selectedProduct.id,
-        productName: selectedProduct.name,
-
-        price: selectedProduct.price,
-        total: selectedProduct.price,
-
-        customer,
-        phone,
-        address,
-
-        paymentMethod: "Cash on Delivery",
-        status: "Pending",
-
-        createdAt: Date.now()
-
-      });
-
-      showMessage(
-        "#orderMessage",
-        "আপনার অর্ডার সফলভাবে জমা হয়েছে!"
-      );
-
-      form.reset();
-      selectedProduct = null;
-
-      setTimeout(() => {
-
-        const modal = $("#orderModal");
-
-        if (modal) {
-          modal.hidden = true;
-          modal.style.display = "none";
-        }
-
-      }, 1500);
-
-    } catch (error) {
-
-      console.error("Order error:", error);
-
-      showMessage(
-        "#orderMessage",
-        "অর্ডার জমা হয়নি। Firebase Database Rules পরীক্ষা করুন।"
-      );
-
-    } finally {
-
-      if (button) button.disabled = false;
-
-    }
-
+  if (!selectedProduct) {
+    showMessage("#orderMessage", "আগে একটি ShopBD পণ্য নির্বাচন করুন।");
+    return;
   }
-);
+
+  const formData = new FormData(form);
+
+  const customer = safeText(formData.get("customer")).trim();
+  const phone = safeText(formData.get("phone")).trim();
+  const address = safeText(formData.get("address")).trim();
+  const payment = safeText(formData.get("payment"));
+
+  if (!customer || !phone || !address) {
+    showMessage("#orderMessage", "নাম, ফোন ও ঠিকানা পূরণ করুন।");
+    return;
+  }
+
+  if (address.length < 8) {
+    showMessage("#orderMessage", "সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।");
+    return;
+  }
+
+  if (payment !== "COD") {
+    showMessage("#orderMessage", "বর্তমানে শুধু Cash on Delivery চালু আছে।");
+    return;
+  }
+
+  const button = form.querySelector('[type="submit"]');
+  if (button) button.disabled = true;
+
+  try {
+    const orderRef = push(ref(db, "orders"));
+
+    await set(orderRef, {
+      productId: selectedProduct.id,
+      productName: selectedProduct.name,
+      price: selectedProduct.price,
+      total: selectedProduct.price,
+      customer,
+      phone,
+      address,
+      paymentMethod: "Cash on Delivery",
+      status: "Pending",
+      createdAt: Date.now()
+    });
+
+    showMessage("#orderMessage", "আপনার অর্ডার সফলভাবে জমা হয়েছে!");
+
+    form.reset();
+    selectedProduct = null;
+
+    setTimeout(() => {
+      const modal = $("#orderModal");
+      if (modal) {
+        modal.hidden = true;
+        modal.style.display = "none";
+      }
+    }, 1500);
+
+  } catch (error) {
+    console.error("Order error:", error);
+    showMessage("#orderMessage", "অর্ডার জমা হয়নি: " + error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+});
 
 
-// ==========================================
-// 11. SELLER REGISTRATION - FIXED
-// Matches index.html:
-// name, contact, shop
-// ==========================================
+// 11. SELLER APPLICATION - FIXED
 
-$("#sellerForm")?.addEventListener(
-  "submit",
-  async event => {
+const sellerForm = $("#sellerForm");
 
+if (sellerForm) {
+  sellerForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const form = event.currentTarget;
 
-    const button = form.querySelector(
-      '[type="submit"]'
-    );
+    // HTML-এর সঠিক field name:
+    // name, contact, shop
 
-    const name =
-      form.querySelector('[name="name"]')
-        ?.value.trim() || "";
-
-    const contact =
-      form.querySelector('[name="contact"]')
-        ?.value.trim() || "";
-
-    const shopName =
-      form.querySelector('[name="shop"]')
-        ?.value.trim() || "";
+    const name = safeText(getField(form, "name")?.value).trim();
+    const contact = safeText(getField(form, "contact")?.value).trim();
+    const shopName = safeText(getField(form, "shop")?.value).trim();
 
     if (!name || !contact || !shopName) {
-
       showMessage(
         "#sellerMessage",
         "নাম, যোগাযোগের তথ্য এবং দোকানের নাম পূরণ করুন।"
       );
-
       return;
     }
 
-    if (button) button.disabled = true;
+    const button = form.querySelector('[type="submit"]');
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = "জমা হচ্ছে...";
+    }
+
+    showMessage("#sellerMessage", "আপনার আবেদন জমা হচ্ছে...");
 
     try {
-
-      const applicationRef = push(
-        ref(db, "sellerApplications")
-      );
+      const applicationRef = push(ref(db, "sellerApplications"));
 
       await set(applicationRef, {
-
         name: name,
-
         phone: contact,
         contact: contact,
-
         email: "",
-
         shopName: shopName,
-
         address: "",
-
         status: "Pending",
-
         createdAt: Date.now()
-
       });
 
       showMessage(
@@ -548,44 +408,36 @@ $("#sellerForm")?.addEventListener(
       form.reset();
 
     } catch (error) {
-
-      console.error(
-        "Seller application error:",
-        error
-      );
+      console.error("Seller application error:", error);
 
       showMessage(
         "#sellerMessage",
-        "আবেদন জমা হয়নি। Firebase Database Rules পরীক্ষা করুন।"
+        "আবেদন জমা হয়নি: " + error.message
       );
 
     } finally {
-
-      if (button) button.disabled = false;
-
+      if (button) {
+        button.disabled = false;
+        button.textContent = "বিক্রেতার আবেদন";
+      }
     }
+  });
 
-  }
-);
+} else {
+  console.error("Seller form not found: #sellerForm");
+}
 
 
-// ==========================================
 // 12. FOOTER YEAR
-// ==========================================
 
 const year = $("#year");
-
 if (year) {
   year.textContent = new Date().getFullYear();
 }
 
 
-// ==========================================
 // 13. INITIAL RENDER
-// ==========================================
 
 renderProducts();
 
-console.log(
-  "ShopBD Marketplace Firebase App Loaded Successfully."
-);
+console.log("ShopBD Marketplace Firebase App Loaded Successfully.");
